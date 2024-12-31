@@ -41,14 +41,11 @@ RUN pip3 install -r /app/requirements-python3.txt
 # Install R dependencies
 RUN Rscript /app/requirements-r.R
 
-# Step 5: Copy the hello-world script for Python 2, Python 3, and R
-COPY hello-world.sh /app/hello-world.sh
+# Copy app
+COPY app.py /app/app.py
 
 # Set work directory
 WORKDIR /app
-
-# Copy app
-COPY app.py /app/app.py
 
 # Expose port
 EXPOSE 8080
