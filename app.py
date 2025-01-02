@@ -1,10 +1,27 @@
-#!/bin/bash
+from flask import Flask
+import subprocess
 
-echo "Running Hello World from Python 2:"
-python2 -c "print('Hello World from Python 2')"
+app = Flask(__name__)
 
-echo "Running Hello World from Python 3:"
-python3 -c "print('Hello World from Python 3')"
+@app.route("/")
+def hello_world():
+    # Run Python 3 Hello World
+    python3_output = subprocess.check_output(["python3", "-c", "print('Hello World from Python 3')"]).decode().strip()
 
-echo "Running Hello World from R:"
-Rscript -e "cat('Hello World from R\n')"
+    # Run R Hello World
+    r_output = subprocess.check_output(["Rscript", "-e", "cat('Hello World from R\\n')"]).decode().strip()
+
+    # Combine all outputs
+    return f"""
+    <html>
+    <head><title>Hello World App</title></head>
+    <body>
+        <h1>Hello World Application</h1>
+        <p>{python3_output}</p>
+        <p>{r_output}</p>
+    </body>
+    </html>
+    """
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
