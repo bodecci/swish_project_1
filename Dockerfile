@@ -4,52 +4,53 @@ FROM ubuntu:20.04
 # Set non-interactive mode for APT
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Step 1: Install Python 2, Python 3, pip, and system dependencies
+# Install Python 2, Python 3, pip, and system dependencies
 RUN apt-get update && apt-get install -y \
-    software-properties-common \
     python2 \
+    python2-dev \
     python3 \
     python3-pip \
-    wget \
-    curl \
-    gnupg \
     build-essential \
-    libcurl4-gnutls-dev \
+    gfortran \
+    libatlas-base-dev \
+    liblapack-dev \
+    libblas-dev \
+    libfreetype6-dev \
+    libpng-dev \
     libxml2-dev \
-    libssl-dev \
+    libxslt-dev \
+    zlib1g-dev \
+    r-base \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Step 2: Install pip for Python 2
+# Install pip for Python 2
 RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && \
     python2 get-pip.py && \
     rm get-pip.py
 
-# Step 3: Install R
-RUN apt-get update && apt-get install -y r-base && rm -rf /var/lib/apt/lists/*
-
-# Step 4: Install dependencies for Python 2, Python 3, and R
+# Copy requirements files (Python 2, Python 3, R)
 COPY requirements-python2.txt /app/requirements-python2.txt
 COPY requirements-python3.txt /app/requirements-python3.txt
 COPY requirements-r.R /app/requirements-r.R
 
 # Install Python 2 dependencies
-RUN pip2 install -r /app/requirements-python2.txt
+RUN pip2 install --no-cache-dir -r /app/requirements-python2.txt
 
 # Install Python 3 dependencies
-RUN pip3 install -r /app/requirements-python3.txt
+RUN pip3 install --no-cache-dir -r /app/requirements-python3.txt
 
 # Install R dependencies
 RUN Rscript /app/requirements-r.R
 
-# Copy app
+# Copy the Flask app
 COPY app.py /app/app.py
 
-# Set work directory
+# Set the working directory
 WORKDIR /app
 
-# Expose port
+# Expose port 8080 for the web server
 EXPOSE 8080
 
-# Run flask app
+# Run the Flask application
 CMD ["python3", "app.py"]
-
