@@ -3,8 +3,6 @@ pandas                       # Data analysis
 scipy                        # Scientific computing
 matplotlib                   # Plotting and visualization
 seaborn                      # Statistical data visualization
-scikit-learn                 # Machine learning
-jupyter                      # Jupyter notebooks for interactive development
 flask                        # Web framework
 requests                     # HTTP requests
 pytest                       # Testing framework
