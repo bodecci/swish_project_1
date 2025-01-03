@@ -27,9 +27,8 @@ RUN apt-get update && apt-get install -y \
     rm get-pip.py && \
     rm -rf /var/lib/apt/lists/*
 
-# Dynamically find and copy libexpat.so.1 from the builder stage
-RUN cp $(find /usr -name "libexpat.so.1" | head -n 1) /app/libexpat.so.1
-
+# Ensure libexpat.so.1 is copied explicitly
+RUN cp /lib/x86_64-linux-gnu/libexpat.so.1 /app/libexpat.so.1
 
 # Copy and install Python 2 dependencies
 COPY requirements-python2.txt /app/requirements-python2.txt
@@ -48,11 +47,18 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Copy Python 3 binaries and shared libraries from the builder stage
-COPY --from=builder /usr/bin/python3 /usr/bin/python3
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libexpat.so.1 /usr/lib/x86_64-linux-gnu/libexpat.so.1
+# Install Python 3 and ensure libexpat1 is present
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    libexpat1 && \
+    rm -rf /var/lib/apt/lists/*
 
+# Copy the application code and dependencies
 COPY --from=builder /app /app
+
 WORKDIR /app
 EXPOSE 8080
+
+# Set the default command to run the application
 CMD ["python3", "app.py"]
