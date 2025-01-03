@@ -2,7 +2,7 @@
 resource "kubernetes_manifest" "deployment" {
   manifest = yamldecode(file("${path.module}/../deployment.yaml"))
 
-  # Ensures namespace is created first
+  # Ensure namespace is created first
   depends_on = [kubernetes_namespace.swish_proj]
 }
 
@@ -10,6 +10,6 @@ resource "kubernetes_manifest" "deployment" {
 resource "kubernetes_manifest" "service" {
   manifest = yamldecode(file("${path.module}/../service.yaml"))
 
-  # Ensures namespace is created first
+  # Ensure namespace is created first
   depends_on = [kubernetes_namespace.swish_proj]
 }
