@@ -25,3 +25,5 @@ To improve build times:
    - Configure CI/CD pipelines to reuse cached layers from previous builds, speeding up subsequent builds.
 
 ---
+
+You can manually trigger the pipeline in the repo and will see the build time for the image, tagging the image and publish to docker hub all take about 40secs.
