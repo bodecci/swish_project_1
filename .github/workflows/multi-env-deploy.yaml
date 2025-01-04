@@ -1,52 +1,68 @@
 name: Multi-Environment Deployment Pipeline
 
 on:
-  workflow_dispatch: # Triggered by the Python-R Swish Proj Pipeline
+  workflow_dispatch:
     inputs:
-      docker_image:
-        description: "Docker image to deploy"
+      environment:
+        description: "Select the environment to deploy to"
         required: true
+        type: choice
+        options:
+          - dev
+          - uat
+          - prod
+      docker_image:
+        description: "Enter the Docker image to deploy"
+        required: true
+        default: "0l4bode/swish-devsecops-proj:latest"
+      cpu_request:
+        description: "Specify the number of CPUs to request (e.g., 1, 2, 4)"
+        required: true
+        default: "1"
 
 jobs:
-  deploy-dev:
-    name: Deploy to Dev
+  deploy:
+    name: Deploy to Selected Environment
     runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to Development
-        run: |
-          echo "Deploying to Development Environment"
-          docker run -d \
-            --name dev-env-${{ github.run_id }} \
-            --cpus=1 \
-            --memory=512Mi \
-            ${{ github.event.inputs.docker_image }}
 
-  deploy-uat:
-    name: Deploy to UAT
-    runs-on: ubuntu-latest
-    needs: deploy-dev
     steps:
-      - name: Deploy to UAT
+      # Step 1: Log Selected Inputs
+      - name: Log Selected Inputs
         run: |
-          echo "Deploying to UAT Environment"
-          docker run -d \
-            --name uat-env-${{ github.run_id }} \
-            --cpus=2 \
-            --memory=1Gi \
-            ${{ github.event.inputs.docker_image }}
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Docker Image: ${{ github.event.inputs.docker_image }}"
+          echo "CPU Request: ${{ github.event.inputs.cpu_request }}"
 
-  deploy-prod:
-    name: Deploy to Prod
-    runs-on: ubuntu-latest
-    needs: deploy-uat
-    environment:
-      name: production # Use GitHub environment for approval
-    steps:
-      - name: Deploy to Production
+      # Step 2: Deploy to the Selected Environment
+      - name: Deploy to Environment
         run: |
-          echo "Deploying to Production Environment"
-          docker run -d \
-            --name prod-env-${{ github.run_id }} \
-            --cpus=4 \
-            --memory=2Gi \
-            ${{ github.event.inputs.docker_image }}
+          case "${{ github.event.inputs.environment }}" in
+            dev)
+              echo "Deploying to Development Environment"
+              docker run -d \
+                --name dev-env-${{ github.run_id }} \
+                --cpus=${{ github.event.inputs.cpu_request }} \
+                --memory=512Mi \
+                ${{ github.event.inputs.docker_image }}
+              ;;
+            uat)
+              echo "Deploying to UAT Environment"
+              docker run -d \
+                --name uat-env-${{ github.run_id }} \
+                --cpus=${{ github.event.inputs.cpu_request }} \
+                --memory=1Gi \
+                ${{ github.event.inputs.docker_image }}
+              ;;
+            prod)
+              echo "Deploying to Production Environment"
+              docker run -d \
+                --name prod-env-${{ github.run_id }} \
+                --cpus=${{ github.event.inputs.cpu_request }} \
+                --memory=2Gi \
+                ${{ github.event.inputs.docker_image }}
+              ;;
+            *)
+              echo "Invalid environment selected!"
+              exit 1
+              ;;
+          esac
