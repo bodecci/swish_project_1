@@ -1,82 +1,88 @@
-## Dockerfile Build Times
+## How to run and deploy this application.
+
+clone the repo
+cd into the `kubernetes/terraform` directory. 
+run `terraform init`
+run `terraform plan`
+run `terraform apply` and enter yes
+
+this will create the namespace: swish-proj 
+and create the deployment `python-r-app` with 2 replicas.
 
 ### Current Build Time
 The build time for the current Dockerfile is **674.4 seconds**.
 
 ---
 
-### How to Improve Build Times
-To improve build times:
-
-1. **Optimize the Order of Instructions**:
-   - Place frequently changing instructions (e.g., `COPY` commands for source code) **after** stable instructions to maximize layer caching.
-   - Combine related commands into a single `RUN` instruction.
-
-2. **Use Smaller Base Images**:
-   - Choose minimal base images (e.g., `alpine` or `distroless`) to reduce image size and build time.
-
-3. **Utilize Multi-Stage Builds**:
-   - Separate the build and runtime stages 
-
-4. **Use Precompiled Binaries**:
-   - Use precompiled binaries instead of building dependencies from source to save time.
-
-5. **Enable Docker Layer Caching in CI/CD Pipelines**:
-   - Configure CI/CD pipelines to reuse cached layers from previous builds, speeding up subsequent builds.
-
----
-
-## Recommendations to Remediate CVEs
-How to address CVEs
-
-1. **Update Base Image**:
-   - Switch to a more secure base image.
-   - Regularly update the base image to ensure the latest security patches are applied.
-
-2. **Use Minimal Base Images**:
-   - Switch to slimmed-down base images (e.g., `alpine`, `debian-slim`, or `distroless`) to reduce the attack surface.
-
-3. **Pin Dependencies to Known Secure Versions**:
-   - Use specific versions of packages and libraries to avoid introducing unpatched vulnerabilities.
-
-4. **Remove Unnecessary Packages**:
-   - Unistall or avoid installing packages that aren't required or unused tools, libraries, and files from the image to reduce exposure to vulnerabilities.
+### Monitor the Kubernetes Deployment:
 
 
-5. **Implement Runtime Security**:
-   - Run containers with the least privileges using the `--user` flag and avoid running as root.
-   - Use security profiles to restrict container capabilities.
+**K9s for local monitoring**:
+    - K9s is a terminal based dashboard that allows engineers to view pod health, pod status, inspect logs in real-time. I use K9s for realtime monitoring
+    - To install, just run brew install k9s. after installtion, run k9s. This starts k9s and you can select the namespace and deployment/pod you want to view metrics, pod health.
 
-6. **Implement CICD scanning**:
-   - Automate scans and vulnerability checks by integrationg vuln scanning in your CICD pipeline. Tools like **Trivy**, **Anchore**, or **Snyk**. You can filter for only `--high` and `--critical` to scan for only high and critical vulns
-   - You can implement image scanning in the CICD pipeline also.
-   - Use security profiles like **AppArmor** or **Seccomp** to restrict container capabilities.
+**EFK Stack**:
+    - Elasticsearch, Fluentd and Kibana (EFK) is an open-source choice for the Kubernetes log aggregation and analysis: Fluentd streams logs to Elasticsearch and you can visualize the logs in Kibana. Create dashboards in Kibana to troubleshoot pod failures, application error and/or anomalies.
+    - There are several ways to deploy EFK, but a quick and easy way to install the charts for elasticsearch and kibana.
 
-7. **Build Snyk integrations that upgrades vulns when found**:
-    - Fix Critical and High-Severity Vulnerabilities: Prioritize fixing high and critical vulnerabilities by implementing Snyk's capability to look for upgrades to vulns found. Make sure to use the flag `--stable` to set the upgrades to stable versions.
+    `helm repo add elastic https://helm.elastic.co
+     helm repo update
+     helm install elasticsearch elastic/elasticsearch`
+     once elasticsearch is running, you can port forward the service.
+     `kubectl port-forward service/elasticsearch-master 9200:9200`
+    
+    you can verify logs are being received in elasticsearch by checking the indices: `curl -X GET "localhost:9200/_cat/indices?v"`
+
+    deploy fluentd:
+    create a configmap for fluentd.
+    install fluentd chart:
+    `helm install fluentd bitnami/fluentd \
+    --set elasticsearch.host=elasticsearch-master \
+    --set resources.requests.memory="200Mi" \
+    --set resources.requests.cpu="100m" \
+    --set replicas=1 \
+    --set configMap=custom-fluentd-config`
+    this installs fluentd daemonset to collect logs from the pods
+
+    install the chart for kibana
+    `helm install kibana elastic/kibana`
+    you will need to forward Kibana to your machine
+    `kubectl port-forward svc/kibana 5601:80`
+
+
+    - You'd wanna create a namespace: logging/monitoring/kube-logging
+    `kind: Namespace
+     apiVersion: v1
+     metadata:
+       name: kube-logging`
+    - You'd wanna create a headless service and a statefulset for Elasticsearch. A Headless service doesn't allocate a cluster IP to represent a set of pods. You create a service but set the clusterIP to none
    
+    - and a Statefulset are given persistent identifiers that they retain even when they're rescheduled. This is very much needed and required for monitoring solutions.
 
----
+**Prometheus and Grafana**: 
+    Prometheus is a popular open-source monitoring and  alerting toolkit for Kubernetes. Prometheus scrapes metrics from Kubernetes components and displays them, including pod CPU/memory usage, pod restarts, and network traffic. And Grafana, just like the EFK stack ( where Fluentd streams logs to Elasticsearch and you can visualize the logs in Kibana), is used to visualize the metrics collected by Prometheus.
 
-## What I would do to avoid deploying malicious packages
+    - Install prometheus using helm. Install the helm charts for promethheus:
+    `
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo update
+    helm install prometheus prometheus-community/prometheus
+    `
+    access prometheus: `kubectl port-forward svc/prometheus-server 9090:80`
+    you can view the metrics on `http://localhost:9090`. 
+
+    - Install Grafana : Grafana is used to visualize the metrics collected by Prometheus.
+    `helm repo add grafana https://grafana.github.io/helm-charts
+     helm repo update
+     helm install grafana grafana/grafana
+    `
+
+    access grafana: `kubectl port-forward svc/grafana 3000:80`.
+    you can view grafana on `http://localhost:3000` and log in 
+    (default credentials: admin / prom-operator).
+
+    setup prometheus as a data source: add prometheus  (http://prometheus-server:9090) as a data source.
 
 
-1. **Use Trusted Sources**:
-    - I would use official images from trusted repos like, Amazon ECR, Docker hub and Red Hat.
-    - Install dependencies from only trusted package managers and avoid using unverified or unofficial packages.
 
-2. **Pin Versions**:
-    - I would specify exact versions for packages (e.g requirements.txt) like `requests==2.25.1 flask==1.1.2`.
-    - Avoid using latest versions images and packages.
 
-3. **Scan Dependencies**:
-    - I already alluded to this, but scanning dependencies to detect vulns is a good way to avoid deploying malicious packages
-
-4. **Use Private Package Repos**:
-    - Hosting ones dependencies in private repos (e.g Nexus, Artifactory). This allows you to control which packages are approved for us.
-
-5. **Automate Scanning in CICD Pipelines**:
-    - Integrate vulnerabiity scanning into your CICD pipelines to automatically detect malicious and or vulnerable packages before deployment. Tools like `snyk` and `trivy`
-
-6. **Educate Developers**:
-    - A not so talked about option, educating and training developers on secure coding practice(s), importance of using trusted sources. 
