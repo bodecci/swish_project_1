@@ -14,7 +14,7 @@ on:
       docker_image:
         description: "Enter the Docker image to deploy"
         required: true
-        type: options
+        type: choice
         options:
           - 0l4bode/swish-devsecops-proj:2.2
           - 0l4bode/swish-devsecops-proj:2.1
