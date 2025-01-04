@@ -13,8 +13,12 @@ on:
           - prod
       docker_image:
         description: "Enter the Docker image to deploy"
-        required: true
-        default: "0l4bode/swish-devsecops-proj:latest"
+        required: choice
+        options:
+          - 0l4bode/swish-devsecops-proj:2.2
+          - 0l4bode/swish-devsecops-proj:2.1
+          - 0l4bode/swish-devsecops-proj:1.1
+        default: "0l4bode/swish-devsecops-proj:2.2"
       cpu_request:
         description: "Specify the number of CPUs to request (e.g., 1, 2, 4)"
         required: true
@@ -23,7 +27,7 @@ on:
 jobs:
   deploy:
     name: Deploy to Selected Environment
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       # Step 1: Log Selected Inputs
