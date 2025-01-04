@@ -2,9 +2,9 @@
 
 clone the repo,
 cd into the `kubernetes/terraform` directory. 
-- **run `terraform init`**
-- **run `terraform plan`**
-- **run `terraform apply` and enter yes**
+- run `terraform init`
+- run `terraform plan`
+- run `terraform apply` and enter yes
 
 this will create the namespace: swish-proj 
 and create the deployment `python-r-app` with 2 replicas and create a service that exposes the deployment.
