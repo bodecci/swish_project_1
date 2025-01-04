@@ -50,7 +50,7 @@ jobs:
               docker run -d \
                 --name dev-env-${{ github.run_id }} \
                 --cpus=${{ github.event.inputs.cpu_request }} \
-                --memory=512Mi \
+                --memory=512m \
                 ${{ github.event.inputs.docker_image }}
               ;;
             uat)
@@ -58,7 +58,7 @@ jobs:
               docker run -d \
                 --name uat-env-${{ github.run_id }} \
                 --cpus=${{ github.event.inputs.cpu_request }} \
-                --memory=1Gi \
+                --memory=1g \
                 ${{ github.event.inputs.docker_image }}
               ;;
             prod)
@@ -66,7 +66,7 @@ jobs:
               docker run -d \
                 --name prod-env-${{ github.run_id }} \
                 --cpus=${{ github.event.inputs.cpu_request }} \
-                --memory=2Gi \
+                --memory=2g \
                 ${{ github.event.inputs.docker_image }}
               ;;
             *)
