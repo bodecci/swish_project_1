@@ -30,7 +30,8 @@ This creates a service, but it is better to use the Kubernetes declarative metho
     `helm repo add elastic https://helm.elastic.co
      helm repo update
      helm install elasticsearch elastic/elasticsearch`
-     once elasticsearch is running, you can port forward the service.
+
+    once elasticsearch is running, you can port forward the service.
      `kubectl port-forward service/elasticsearch-master 9200:9200`
     
     you can verify logs are being received in elasticsearch by checking the indices: `curl -X GET "localhost:9200/_cat/indices?v"`
@@ -51,25 +52,14 @@ This creates a service, but it is better to use the Kubernetes declarative metho
     you will need to forward Kibana to your machine
     `kubectl port-forward svc/kibana 5601:80`
 
-
-    - You'd wanna create a namespace: logging/monitoring/kube-logging
-    `kind: Namespace
-     apiVersion: v1
-     metadata:
-       name: kube-logging`
-    - You'd wanna create a headless service and a statefulset for Elasticsearch. A Headless service doesn't allocate a cluster IP to represent a set of pods. You create a service but set the clusterIP to none
-   
-    - and a Statefulset are given persistent identifiers that they retain even when they're rescheduled. This is very much needed and required for monitoring solutions.
-
 **Prometheus and Grafana**: 
     Prometheus is a popular open-source monitoring and  alerting toolkit for Kubernetes. Prometheus scrapes metrics from Kubernetes components and displays them, including pod CPU/memory usage, pod restarts, and network traffic. And Grafana, just like the EFK stack ( where Fluentd streams logs to Elasticsearch and you can visualize the logs in Kibana), is used to visualize the metrics collected by Prometheus.
 
     - Install prometheus using helm. Install the helm charts for promethheus:
-    `
-    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    
+    `helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     helm repo update
-    helm install prometheus prometheus-community/prometheus
-    `
+    helm install prometheus prometheus-community/prometheus`
     access prometheus: `kubectl port-forward svc/prometheus-server 9090:80`
     you can view the metrics on `http://localhost:9090`. 
 
@@ -84,7 +74,5 @@ This creates a service, but it is better to use the Kubernetes declarative metho
     (default credentials: admin / prom-operator).
 
     setup prometheus as a data source: add prometheus  (http://prometheus-server:9090) as a data source.
-
-
 
 
