@@ -6,12 +6,13 @@ cd into the `kubernetes/terraform` directory.
 - run `terraform plan`
 - run `terraform apply` and enter yes
 
-this will create the namespace: swish-proj 
-and create the deployment `python-r-app` with 2 replicas and create a service that exposes the deployment.
+this will create the namespace: `swish-proj ` in which the deployment and service will be created in.
 
-One can also expose a deployment by running. This creates a service.
+It creates the deployment `python-r-app` with 2 replicas and creates a service that exposes the deployment.
+
+One can also expose a deployment by running.
 `kubectl expose deployment <deployment-name> --type=NodePort --port=8080 --target-port=8080`
-But it is better to use the Kubernetes declarative method used in the terraform cmds above.
+This creates a service, but it is better to use the Kubernetes declarative method used in the terraform cmds above.
 
 
 ### Current Build Time
