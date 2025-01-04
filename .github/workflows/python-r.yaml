@@ -13,7 +13,7 @@ on:
     paths:
         - "Dockerfile"          # Trigger for Dockerfile changes
         - "app.py"              # Trigger for app changes
-  workflow_dispatch:                 # Allows manual triggering of the pipeline
+  workflow_dispatch:            # Allows manual triggering of the pipeline
 
 env:
   DOCKER_IMAGE: 0l4bode/swish-devsecops-proj
