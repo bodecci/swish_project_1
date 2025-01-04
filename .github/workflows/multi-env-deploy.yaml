@@ -13,7 +13,8 @@ on:
           - prod
       docker_image:
         description: "Enter the Docker image to deploy"
-        required: choice
+        required: true
+        type: options
         options:
           - 0l4bode/swish-devsecops-proj:2.2
           - 0l4bode/swish-devsecops-proj:2.1
