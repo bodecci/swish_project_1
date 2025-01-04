@@ -18,11 +18,14 @@ on:
           - 0l4bode/swish-devsecops-proj:2.2
           - 0l4bode/swish-devsecops-proj:2.1
           - 0l4bode/swish-devsecops-proj:1.1
-        default: "0l4bode/swish-devsecops-proj:2.2"
       cpu_request:
         description: "Specify the number of CPUs to request (e.g., 1, 2, 4)"
         required: true
-        default: "1"
+        type: choice
+        options: 
+          - "1"
+          - "2"
+          - "4"
 
 jobs:
   deploy:
