@@ -11,9 +11,9 @@ on:
     branches:
       - main
     paths:
-        - "Dockerfile"          # Trigger for Dockerfile changes
-        - "app.py"              # Trigger for app changes
-  workflow_dispatch:            # Allows manual triggering of the pipeline
+      - "Dockerfile"          # Trigger for Dockerfile changes
+      - "app.py"              # Trigger for app changes
+  workflow_dispatch:          # Allows manual triggering of the pipeline
 
 env:
   DOCKER_IMAGE: 0l4bode/swish-devsecops-proj
@@ -24,8 +24,8 @@ jobs:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     if: |
-      contains(github.event.head_commit.message, 'Dockerfile') || 
-      contains(github.event.head_commit.message, 'app.py') || 
+      github.event_name == 'push' || 
+      github.event_name == 'pull_request' || 
       github.event_name == 'workflow_dispatch'
 
     steps:
