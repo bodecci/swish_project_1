@@ -27,4 +27,4 @@ To improve build times:
 
 ---
 
-You can manually trigger the pipeline in the repo and will see the build time for the image, tagging the image and publish to docker hub all take about 40secs.
+You can manually trigger the pipeline in the repo and will see the total build time for the image, tagging the image and publish to docker hub all take about 40secs.
