@@ -12,7 +12,7 @@ on:
           - uat
           - prod
       docker_image:
-        description: "Enter the Docker image to deploy"
+        description: "Specify the Docker image to deploy"
         required: true
         type: choice
         options:
@@ -27,6 +27,12 @@ on:
           - "1"
           - "2"
           - "4"
+      packages:
+        description: "Enter a comma-separated list of additional packages to install"
+        required: false
+        type: choice
+        options:
+        default: "":
 
 jobs:
   deploy:
