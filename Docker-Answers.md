@@ -1,7 +1,8 @@
 ## Dockerfile Build Times
 
 ### Current Build Time
-The build time for the current Dockerfile is **674.4 seconds**.
+The build time for the Dockerfile is **674.4 seconds**.
+After making improvements and utilizing CICD cache, it takes about **22 secs** to build the image.
 
 ---
 
